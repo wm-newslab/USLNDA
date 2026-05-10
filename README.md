@@ -66,21 +66,21 @@ A multi-stage pipeline extracts structured article data from WARC files:
 
 ---
 
-### 4.1. Installation & Requirements
+## 3. Installation & Requirements
 
-#### 4.1.1 System Requirements
+### 4.1 System Requirements
 - Python 3.x
 - Internet Archive CLI tool (`ia` command)
 - For Browsertrix crawling: Browsertrix installed and accessible
   
-#### 4.1.2 Python Dependencies
+### 3.2 Python Dependencies
 
 Install all required packages:
 ```bash
 pip install feedparser requests beautifulsoup4 storysniffer tqdm internetarchive pandas warcio
 ```
 
-#### 4.1.3 Environment Variables
+### 3.3 Environment Variables
 The following environment variables can be used to configure scripts:
 
 **Email Configuration (for notifications):**
@@ -93,7 +93,7 @@ The following environment variables can be used to configure scripts:
 - `DAYS_BACK`: Number of days to look back for validation (default: `3`)
 - `MAX_WORKERS`: Number of parallel workers (default: `8`)
 
-#### 4.1.4 Internet Archive Authentication
+### 3.4 Internet Archive Authentication
 Set up Internet Archive credentials:
 ```bash
 ia configure
@@ -101,6 +101,8 @@ ia configure
 This will prompt for your Internet Archive username and password.
 
 ---
+
+## 4. Implementation
 
 ### 4.2. Build Scripts
 
@@ -376,7 +378,7 @@ python process/process_uslnda.py \
 
 ---
 
-## Use Cases
+## 5. Use Cases
 
 <details>
 <summary>1. Analyzing News Deserts and Coverage Gaps</summary>
