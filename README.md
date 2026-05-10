@@ -175,38 +175,70 @@ python build/browsertrix-crawler.py \
 </details>
 
 
-#### 4.2.2. upload_validator.py
-Validates uploaded files to the Internet Archive by comparing local MD5 hashes with IA metadata. Automatically uploads missing files with retry logic.
+#### 4.2.2. `upload_validator.py`
+
+Validates uploaded WARC files on the Internet Archive by comparing local MD5 hashes against Internet Archive metadata.
+
+The script detects missing or incomplete uploads and automatically retries failed uploads using parallel workers and retry logic.
 
 <details>
-<summary>Features</summary>
-- MD5 validation of uploaded files
-- Parallel processing for uploads
-- Retry mechanism (3 attempts with 5-minute delays)
-- Email notifications
+<summary><strong>Overview</strong></summary>
+
+`upload_validator.py` performs post-upload validation for archived WARC files stored on the Internet Archive.
+
+It continuously checks recently uploaded files, verifies integrity using MD5 checksums, identifies missing uploads, and automatically retries failed uploads when necessary.
+
+</details>
+
+<details>
+<summary><strong>Features</strong></summary>
+
+- MD5 checksum validation
+- Detection of missing or incomplete uploads
+- Parallel upload validation
+- Automatic retry handling
+- Exponential backoff retry logic
+- Email notifications for failures
+- Continuous daily validation workflow
 - Sleeps until next midnight after completion
-- Automatic retry with exponential backoff
+
 </details>
 
 <details>
-<summary>Configuration (Environment Variables):</summary>
-- `EMAIL_USER`: Gmail account for sending alerts
-- `EMAIL_PASS`: Gmail app password
-- `EMAIL_TO`: Recipient email address
-- `BASE_DIR` (default: `/app1/ia-collection`): Base directory for data
-- `DAYS_BACK` (default: `3`): Number of days back to validate
-- `MAX_WORKERS` (default: `8`): Number of parallel workers
+<summary><strong>Configuration (Environment Variables)</strong></summary>
+
+| Variable | Description |
+|---|---|
+| `EMAIL_USER` | Gmail account used for sending alerts |
+| `EMAIL_PASS` | Gmail app password |
+| `EMAIL_TO` | Recipient email address for notifications |
+| `BASE_DIR` | Base directory for WARC collection data (default: `/app1/ia-collection`) |
+| `DAYS_BACK` | Number of previous days to validate (default: `3`) |
+| `MAX_WORKERS` | Number of parallel validation/upload workers (default: `8`) |
+
 </details>
 
 <details>
-<summary>Example Usage</summary>
+<summary><strong>Retry Behavior</strong></summary>
+
+- Maximum retry attempts: `3`
+- Delay between retries: `5 minutes`
+- Automatic exponential backoff for repeated failures
+
+</details>
+
+<details>
+<summary><strong>Example Usage</strong></summary>
+
 ```bash
 export EMAIL_USER="your-email@gmail.com"
 export EMAIL_PASS="your-app-password"
 export EMAIL_TO="recipient@example.com"
 export BASE_DIR="/path/to/ia-collection"
+
 python build/upload_validator.py
 ```
+
 </details>
   
 #### 4.2.3. `uploader.py`
