@@ -104,47 +104,74 @@ This will prompt for your Internet Archive username and password.
 
 ### 4.2. Build Scripts
 
-#### 4.2.1. browsertrix-crawler.py
-Daily high-fidelity web crawler using Browsertrix that crawls local news websites, extracts article URLs from RSS feeds and homepages, detects news content using heuristics, and generates WARC archives for preservation at the Internet Archive.
+#### 4.2.1. `browsertrix-crawler.py`
+
+Daily high-fidelity web crawler built on Browsertrix for collecting and preserving local news webpages as WARC archives on the Internet Archive.
+
+The crawler extracts article URLs from RSS feeds and homepages, identifies likely news articles using heuristics and StorySniffer, and archives fully rendered webpages including dynamic JavaScript content.
 
 <details>
-<summary>Features</summary>
+<summary><strong>Overview</strong></summary>
+
+`browsertrix-crawler.py` is the primary crawling component of the USLNDA pipeline.  
+It performs continuous large-scale crawling of local news websites and generates high-fidelity WARC archives suitable for long-term preservation and downstream processing.
+
+</details>
+
+<details>
+<summary><strong>Features</strong></summary>
+
 - RSS feed parsing and URL extraction
+- Homepage crawling for sites without RSS feeds
 - Story detection using StorySniffer
 - Concurrent crawling with progress tracking
-- Email alerts for completion/failures
+- High-fidelity Browsertrix rendering
+- WARC generation for preservation
+- Email alerts for completion and failures
 - Rotating log files
 - Configurable time limits and worker processes
+- Kubernetes/HPC friendly execution
+
 </details>
 
 <details>
-<summary>Parameters</summary>
-- `--input` (default: `data.json`): Path to JSON input file with publication data
-- `--sleep` (default: `3600`): Time between iterations in seconds
-- `--max_articles` (default: `5`): Maximum number of articles to scrape per publication
-- `--log` (default: `/app1/ia-collection/news_scraper.log`): Path to log file
-- `--log_level` (default: `INFO`): Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-- `--mediatype` (default: `web`): Media type for Internet Archive upload
-- `--collection` (default: `us-local-news-data`): Internet Archive collection name
-- `--item_identifier` (default: `USLNDA`): Prefix for item identifier
-- `--time_limit`: Time limit in seconds for archiving subprocess
-- `--time_per_url` (default: `120`): Time limit in seconds for archiving one article
-- `--collection_directory` (default: `/app1/ia-collection`): Directory to collect WARC files
-- `--tmp_directory` (default: `/app1`): Directory for temporary WARC files
-- `--delete_warc` (default: `True`): Delete WARC file after uploading
-- `--start` (default: `0`): Start index of states to process
-- `--end` (default: `None`): End index (exclusive) of states to process
-- `--once_per_day` (default: `True`): Run only once per day for all states
-- `--workers` (default: `5`): Number of parallel crawling workers per run
-- `--rolloverSize` (default: `10000000000`): WARC rollover size in bytes
-- `--hung_threshold` (default: `7200`): Seconds without logs before alerting and exiting
+<summary><strong>Parameters</strong></summary>
+
+| Parameter | Description |
+|---|---|
+| `--input` | Path to publication JSON input file (default: `data.json`) |
+| `--sleep` | Time between crawl iterations in seconds (default: `3600`) |
+| `--max_articles` | Maximum articles to crawl per publication (default: `5`) |
+| `--log` | Log file path (default: `/app1/ia-collection/news_scraper.log`) |
+| `--log_level` | Logging level (default: `INFO`) |
+| `--mediatype` | Internet Archive media type (default: `web`) |
+| `--collection` | Internet Archive collection name (default: `us-local-news-data`) |
+| `--item_identifier` | Prefix for Internet Archive item identifiers (default: `USLNDA`) |
+| `--time_limit` | Time limit for archiving subprocess |
+| `--time_per_url` | Timeout per article URL in seconds (default: `120`) |
+| `--collection_directory` | Directory for storing WARC files (default: `/app1/ia-collection`) |
+| `--tmp_directory` | Temporary working directory (default: `/app1`) |
+| `--delete_warc` | Delete WARC files after upload (default: `True`) |
+| `--start` | Starting state index for processing (default: `0`) |
+| `--end` | Ending state index (exclusive) |
+| `--once_per_day` | Run crawler once daily for all states (default: `True`) |
+| `--workers` | Parallel crawling workers (default: `5`) |
+| `--rolloverSize` | WARC rollover size in bytes (default: `10000000000`) |
+| `--hung_threshold` | Seconds without logs before forced exit/alert (default: `7200`) |
+
 </details>
 
 <details>
-<summary>Example Usage</summary>
+<summary><strong>Example Usage</strong></summary>
+
 ```bash
-python build/browsertrix-crawler.py --input publications.json --workers 8 --max_articles 10 --log crawler.log
+python build/browsertrix-crawler.py \
+    --input publications.json \
+    --workers 8 \
+    --max_articles 10 \
+    --log crawler.log
 ```
+
 </details>
 
 
@@ -182,120 +209,198 @@ python build/upload_validator.py
 ```
 </details>
   
-#### 4.2.3. uploader.py
-High-performance uploader for Internet Archive using process-based parallelism. Designed for HPC Kubernetes environments with built-in retry logic.
+#### 4.2.3. `uploader.py`
+
+High-performance Internet Archive uploader designed for HPC and Kubernetes environments using process-based parallelism and built-in retry mechanisms.
 
 <details>
-<summary>Features</summary>
-- ProcessPoolExecutor for parallel uploads
-- Built-in retries via internetarchive library
-- Optional staging to local SSD disk
-- Optional deletion after successful upload
-- Email notifications for failures
-- Rotating log files
+<summary><strong>Overview</strong></summary>
+
+`uploader.py` uploads WARC files to the Internet Archive using parallel worker processes.  
+It supports retry handling, optional SSD staging, upload cleanup, and logging for large-scale archival workflows.
+
 </details>
 
 <details>
-<summary>Parameters</summary>
-- `--collection` (default: `us-local-news-data`): Internet Archive collection name
-- `--collection_directory` (default: `/app1/ia-collection`): Directory containing dated collection folders
-- `--uploader`: Uploader identity
-- `--mediatype` (default: `web`): Media type for Internet Archive upload
-- `--delete_uploaded_warc`: Delete WARC file after successful upload
-- `--max_workers` (default: `10`): Number of parallel worker processes
-- `--log` (default: `/app1/news_scraper.log`): Path to log file
-- `--log_level` (default: `INFO`): Logging level
-- `--max_retries` (default: `6`): Max retries per file
-- `--backoff_base` (default: `2.0`): Base sleep in seconds for exponential backoff
-- `--stage_to_local`: Copy files to local SSD before uploading (faster reads)
-- `--local_stage_path` (default: `/tmp/ia_staging`): Local staging directory path
-- `--prefix` (default: `USLNDA`): Prefix for dated folder name
+<summary><strong>Parameters</strong></summary>
+
+| Parameter | Description |
+|---|---|
+| `--collection` | Internet Archive collection name (default: `us-local-news-data`) |
+| `--collection_directory` | Directory containing dated collection folders (default: `/app1/ia-collection`) |
+| `--uploader` | Uploader identity |
+| `--mediatype` | Media type for Internet Archive upload (default: `web`) |
+| `--delete_uploaded_warc` | Delete WARC file after successful upload |
+| `--max_workers` | Number of parallel worker processes (default: `10`) |
+| `--log` | Path to log file (default: `/app1/news_scraper.log`) |
+| `--log_level` | Logging level (default: `INFO`) |
+| `--max_retries` | Maximum retries per file (default: `6`) |
+| `--backoff_base` | Base sleep time for exponential backoff (default: `2.0`) |
+| `--stage_to_local` | Copy files to local SSD before upload |
+| `--local_stage_path` | Local SSD staging directory (default: `/tmp/ia_staging`) |
+| `--prefix` | Prefix for dated folder names (default: `USLNDA`) |
+
 </details>
 
 <details>
-<summary>Example Usage</summary>
+<summary><strong>Example Usage</strong></summary>
+
 ```bash
-python build/uploader.py --max_workers 16 --stage_to_local --local_stage_path /ssd/staging --collection us-local-news-data
+python build/uploader.py \
+    --max_workers 16 \
+    --stage_to_local \
+    --local_stage_path /ssd/staging \
+    --collection us-local-news-data
 ```
+
 </details>
 
 ---
 
 ### 4.3. Process Scripts
 
-#### 4.3.1. download_uslnda.py
-Downloads missing .warc.gz files from the Internet Archive for specified date ranges and identifiers.
+#### 4.3.1. `download_uslnda.py`
+
+Utility script for downloading `.warc.gz` files from the Internet Archive for specific date ranges and identifier ranges.
+
+The script avoids redundant downloads by checking existing local files and supports parallel downloading for large-scale archival retrieval workflows.
 
 <details>
-<summary>Features</summary>
-- Downloads only missing files to avoid redundancy
+<summary><strong>Overview</strong></summary>
+
+`download_uslnda.py` downloads archived USLNDA WARC files from the Internet Archive into a local storage directory for downstream processing and analysis.
+
+It supports retry handling, progress logging, configurable worker pools, and optional forced redownloads.
+
+</details>
+
+<details>
+<summary><strong>Features</strong></summary>
+
+- Downloads only missing files
 - Parallel downloading with configurable workers
-- Retry logic for failed downloads
+- Retry handling for failed downloads
 - Progress logging
-- Force redownload option
+- Configurable identifier ranges
+- Optional force redownload
+- Scalable for HPC/distributed environments
+
 </details>
 
 <details>
-<summary>Parameters</summary>
-- `--year` (required): Year (YYYY format)
-- `--month` (required): Month (MM format)
-- `--download_root` (required): Root directory for downloads
-- `--ia_bin` (default: `ia`): Path to Internet Archive CLI binary
-- `--workers` (default: `4`): Number of parallel download workers
-- `--retries` (default: `3`): Number of retry attempts for failed downloads
-- `--retry_sleep` (default: `5`): Seconds to sleep between retry attempts
-- `--progress_log_root` (default: `download_logs`): Directory for progress logs
-- `--start_identifier` (required): Starting identifier for range
-- `--end_identifier` (required): Ending identifier for range
-- `--max_identifiers` (default: `None`): Maximum number of identifiers to process
-- `--force`: Redownload all files even if present locally
+<summary><strong>Parameters</strong></summary>
+
+| Parameter | Description |
+|---|---|
+| `--year` | Target year in `YYYY` format |
+| `--month` | Target month in `MM` format |
+| `--download_root` | Root directory for downloaded files |
+| `--ia_bin` | Path to Internet Archive CLI binary (default: `ia`) |
+| `--workers` | Number of parallel download workers (default: `4`) |
+| `--retries` | Retry attempts for failed downloads (default: `3`) |
+| `--retry_sleep` | Sleep duration between retries in seconds (default: `5`) |
+| `--progress_log_root` | Directory for progress logs (default: `download_logs`) |
+| `--start_identifier` | Starting identifier for download range |
+| `--end_identifier` | Ending identifier for download range |
+| `--max_identifiers` | Maximum identifiers to process |
+| `--force` | Redownload files even if already present locally |
+
 </details>
 
 <details>
-<summary>Example Usage</summary>
+<summary><strong>Example Usage</strong></summary>
+
 ```bash
-python process/download_uslnda.py --year 2023 --month 01 --download_root /data/downloads --workers 8 --start_identifier uslnda-001 --end_identifier uslnda-050
+python process/download_uslnda.py \
+    --year 2023 \
+    --month 01 \
+    --download_root /data/downloads \
+    --workers 8 \
+    --start_identifier uslnda-001 \
+    --end_identifier uslnda-050
 ```
+
 </details>
   
-#### 4.3.2. process_uslnda.py
-Processes downloaded WARC files to extract and analyze news articles with geographic and temporal metadata. Implements a multi-stage pipeline for article identification, validation, content extraction, and metadata enrichment.
+#### 4.3.2. `process_uslnda.py`
+
+Processes downloaded WARC files to extract structured news article datasets enriched with geographic and temporal metadata.
+
+The script implements a scalable multi-stage processing pipeline for article identification, validation, content extraction, metadata enrichment, and Parquet generation.
 
 <details>
-<summary>Features</summary>
-- WARC record filtering (response-type records only)
-- Content-type filtering (HTML resources only)
-- Domain matching (local news websites only)
+<summary><strong>Overview</strong></summary>
+
+`process_uslnda.py` is the primary data extraction and processing component of the USLNDA pipeline.
+
+It reads downloaded WARC files, filters valid HTML news content, identifies likely news articles using heuristics and StorySniffer, extracts article text and metadata, and generates structured Parquet datasets partitioned by geographic and temporal attributes.
+
+</details>
+
+<details>
+<summary><strong>Processing Pipeline</strong></summary>
+
+1. WARC record filtering  
+2. Content-type filtering  
+3. Local news domain matching  
+4. Article identification using StorySniffer and heuristics  
+5. HTML parsing and content extraction  
+6. Geographic metadata enrichment  
+7. Structured Parquet generation  
+8. Summary statistics generation  
+
+</details>
+
+<details>
+<summary><strong>Features</strong></summary>
+
+- WARC record filtering (`response` records only)
+- HTML content filtering
+- Local news domain matching
 - Article identification using StorySniffer and heuristics
-- Content extraction (titles, main text) with HTML parsing
-- Metadata enrichment with county/state and FIPS code information
-- Parquet output organized by state, county, and date
-- Summary CSV generation with statistics
-- Parallel processing with ProcessPoolExecutor for scalable processing
+- HTML parsing for title and content extraction
+- Geographic enrichment with county/state/FIPS metadata
+- Parquet output partitioned by state, county, and date
+- Summary CSV generation
+- Parallel processing using `ProcessPoolExecutor`
+- Scalable processing for large WARC collections
+
 </details>
 
 <details>
-<summary>Parameters</summary>
-- `--year` (required): Year (YYYY format)
-- `--month` (required): Month (MM format)
-- `--site_csv` (required): Path to site CSV file with publication data
-- `--download_root` (default: `warc_cache`): Root directory containing downloaded WARC files
-- `--output_root` (default: `article_parquet`): Output directory for parquet files
-- `--summary_csv` (default: `results/month_summary.csv`): Path to summary CSV output
-- `--buffer_limit` (default: `200`): Buffer size for batch processing
-- `--report_every_records` (default: `2500`): Progress report interval (records)
-- `--report_every_html` (default: `500`): Progress report interval (HTML pages)
-- `--workers` (default: `4`): Number of parallel WARC workers per identifier
-- `--start_identifier` (default: `None`): Starting identifier for processing range
-- `--end_identifier` (default: `None`): Ending identifier for processing range
-- `--max_identifiers` (default: `None`): Maximum number of identifiers to process
+<summary><strong>Parameters</strong></summary>
+
+| Parameter | Description |
+|---|---|
+| `--year` | Target year in `YYYY` format |
+| `--month` | Target month in `MM` format |
+| `--site_csv` | CSV file containing publication/site metadata |
+| `--download_root` | Root directory containing downloaded WARC files (default: `warc_cache`) |
+| `--output_root` | Output directory for Parquet datasets (default: `article_parquet`) |
+| `--summary_csv` | Output path for summary statistics CSV (default: `results/month_summary.csv`) |
+| `--buffer_limit` | Buffer size for batch processing (default: `200`) |
+| `--report_every_records` | Progress reporting interval for processed records (default: `2500`) |
+| `--report_every_html` | Progress reporting interval for HTML pages (default: `500`) |
+| `--workers` | Number of parallel WARC workers per identifier (default: `4`) |
+| `--start_identifier` | Starting identifier for processing range |
+| `--end_identifier` | Ending identifier for processing range |
+| `--max_identifiers` | Maximum identifiers to process |
+
 </details>
 
 <details>
-<summary>Example Usage</summary>
+<summary><strong>Example Usage</strong></summary>
+
 ```bash
-python process/process_uslnda.py --year 2023 --month 01 --site_csv sites.csv --download_root /data/downloads --output_root /data/output --workers 8
+python process/process_uslnda.py \
+    --year 2023 \
+    --month 01 \
+    --site_csv sites.csv \
+    --download_root /data/downloads \
+    --output_root /data/output \
+    --workers 8
 ```
+
 </details>
 
 ---
