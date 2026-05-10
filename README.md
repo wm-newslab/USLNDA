@@ -106,17 +106,8 @@ This will prompt for your Internet Archive username and password.
 
 #### 4.2.1. `browsertrix-crawler.py`
 
-Daily high-fidelity web crawler built on Browsertrix for collecting and preserving local news webpages as WARC archives on the Internet Archive.
-
-The crawler extracts article URLs from RSS feeds and homepages, identifies likely news articles using heuristics and StorySniffer, and archives fully rendered webpages including dynamic JavaScript content.
-
-<details>
-<summary><strong>Overview</strong></summary>
-
 `browsertrix-crawler.py` is the primary crawling component of the USLNDA pipeline.  
 It performs continuous large-scale crawling of local news websites and generates high-fidelity WARC archives suitable for long-term preservation and downstream processing.
-
-</details>
 
 <details>
 <summary><strong>Features</strong></summary>
@@ -177,18 +168,7 @@ python build/browsertrix-crawler.py \
 
 #### 4.2.2. `upload_validator.py`
 
-Validates uploaded WARC files on the Internet Archive by comparing local MD5 hashes against Internet Archive metadata.
-
-The script detects missing or incomplete uploads and automatically retries failed uploads using parallel workers and retry logic.
-
-<details>
-<summary><strong>Overview</strong></summary>
-
-`upload_validator.py` performs post-upload validation for archived WARC files stored on the Internet Archive.
-
-It continuously checks recently uploaded files, verifies integrity using MD5 checksums, identifies missing uploads, and automatically retries failed uploads when necessary.
-
-</details>
+`upload_validator.py` performs post-upload validation for archived WARC files stored on the Internet Archive. It continuously checks recently uploaded files, verifies integrity using MD5 checksums, identifies missing uploads, and automatically retries failed uploads when necessary.
 
 <details>
 <summary><strong>Features</strong></summary>
@@ -243,15 +223,7 @@ python build/upload_validator.py
   
 #### 4.2.3. `uploader.py`
 
-High-performance Internet Archive uploader designed for HPC and Kubernetes environments using process-based parallelism and built-in retry mechanisms.
-
-<details>
-<summary><strong>Overview</strong></summary>
-
-`uploader.py` uploads WARC files to the Internet Archive using parallel worker processes.  
-It supports retry handling, optional SSD staging, upload cleanup, and logging for large-scale archival workflows.
-
-</details>
+`uploader.py` uploads WARC files to the Internet Archive using parallel worker processes. It supports retry handling, optional SSD staging, upload cleanup, and logging for large-scale archival workflows.
 
 <details>
 <summary><strong>Parameters</strong></summary>
@@ -293,18 +265,7 @@ python build/uploader.py \
 
 #### 4.3.1. `download_uslnda.py`
 
-Utility script for downloading `.warc.gz` files from the Internet Archive for specific date ranges and identifier ranges.
-
-The script avoids redundant downloads by checking existing local files and supports parallel downloading for large-scale archival retrieval workflows.
-
-<details>
-<summary><strong>Overview</strong></summary>
-
-`download_uslnda.py` downloads archived USLNDA WARC files from the Internet Archive into a local storage directory for downstream processing and analysis.
-
-It supports retry handling, progress logging, configurable worker pools, and optional forced redownloads.
-
-</details>
+`download_uslnda.py` downloads archived USLNDA WARC files from the Internet Archive into a local storage directory for downstream processing and analysis. It supports retry handling, progress logging, configurable worker pools, and optional forced redownloads.
 
 <details>
 <summary><strong>Features</strong></summary>
@@ -356,32 +317,10 @@ python process/download_uslnda.py \
   
 #### 4.3.2. `process_uslnda.py`
 
-Processes downloaded WARC files to extract structured news article datasets enriched with geographic and temporal metadata.
-
-The script implements a scalable multi-stage processing pipeline for article identification, validation, content extraction, metadata enrichment, and Parquet generation.
-
-<details>
-<summary><strong>Overview</strong></summary>
-
-`process_uslnda.py` is the primary data extraction and processing component of the USLNDA pipeline.
-
-It reads downloaded WARC files, filters valid HTML news content, identifies likely news articles using heuristics and StorySniffer, extracts article text and metadata, and generates structured Parquet datasets partitioned by geographic and temporal attributes.
+`process_uslnda.py` is the primary data extraction and processing component of the USLNDA pipeline. It reads downloaded WARC files, filters valid HTML news content, identifies likely news articles using heuristics and StorySniffer, extracts article text and metadata, and generates structured Parquet datasets partitioned by geographic and temporal attributes.
 
 </details>
 
-<details>
-<summary><strong>Processing Pipeline</strong></summary>
-
-1. WARC record filtering  
-2. Content-type filtering  
-3. Local news domain matching  
-4. Article identification using StorySniffer and heuristics  
-5. HTML parsing and content extraction  
-6. Geographic metadata enrichment  
-7. Structured Parquet generation  
-8. Summary statistics generation  
-
-</details>
 
 <details>
 <summary><strong>Features</strong></summary>
