@@ -15,12 +15,15 @@ To cite, kindly use:
 }
 ```
 
+<img src="img/overview.png" alt="Alt Text"/>
+
+
 ## 2. Dataset
 
 ### 2.1. Access Dataset
 
-1. USLNDA:
-2. Processed USLNDA 6 months snapshot:
+1. USLNDA: https://archive.org/details/us-local-news-data
+2. Processed USLNDA 6-month snapshot:
 
 ## 2.2. Dataset Overview
 
@@ -36,6 +39,8 @@ To cite, kindly use:
 - WARC (Web ARChive) format for full web preservation
 - Includes HTML, CSS, JavaScript, images, and dynamically rendered content
 - Enriched with metadata: temporal and county-level geographic information including state, county, and FIPS codes
+
+<img src="img/us-map.png" alt="Alt Text"/>
 
 ## 4. USLNDA workflow 
 
