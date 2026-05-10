@@ -66,7 +66,7 @@ A multi-stage pipeline extracts structured article data from WARC files:
 
 ---
 
-### 4.1. Configuration, Requirements and Dependencies
+### 4.1. Installation & Requirements
 
 #### 4.1.1 System Requirements
 - Python 3.x
