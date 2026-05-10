@@ -68,7 +68,7 @@ A multi-stage pipeline extracts structured article data from WARC files:
 
 ## 3. Installation & Requirements
 
-### 4.1 System Requirements
+### 3.1 System Requirements
 - Python 3.x
 - Internet Archive CLI tool (`ia` command)
 - For Browsertrix crawling: Browsertrix installed and accessible
