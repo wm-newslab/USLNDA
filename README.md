@@ -25,7 +25,7 @@ To cite, kindly use:
 1. USLNDA: https://archive.org/details/us-local-news-data
 2. Processed USLNDA 6-month snapshot:
 
-## 2.2. Dataset Overview
+### 2.2. Dataset Overview
 
 **Scale & Coverage:**
 - 14,000+ local news sources (newspapers, TV, radio stations)
@@ -33,12 +33,11 @@ To cite, kindly use:
 - 363+ million WARC records (6-month analysis)
 - 3.8+ million validated news articles
 - Daily ongoing crawls (up to 5 articles per source per day)
-- Time period: October 2025 - Present
 
 **Data Format:**
 - WARC (Web ARChive) format for full web preservation
 - Includes HTML, CSS, JavaScript, images, and dynamically rendered content
-- Enriched with metadata: temporal and county-level geographic information including state, county, and FIPS codes
+- Processed USLNDA 6-month snapshot with enriched with metadata: temporal and county-level geographic information including state, county, and FIPS codes
 
 <img src="img/us-map.png" alt="Alt Text"/>
 
