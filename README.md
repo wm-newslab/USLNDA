@@ -3,8 +3,13 @@
 ## 1. About USLNDA
 
 USLNDA is **the first public large-scale ongoing longitudinal US local news repository**, which is a comprehensive archive of US local news content, publicly available at the [Internet Archive](https://archive.org/details/us-local-news-data). This project addresses the critical decline in local journalism by preserving high-fidelity web content from over **14,000 US local newspapers, TV, and radio stations across all 50 states**. 
-
-The archive captures not just text, but complete web resources including HTML, CSS, JavaScript, images, and dynamically rendered content—preserving news articles as they appear to readers. With daily crawls and county-level geographic metadata, USLNDA enables researchers to study news deserts, track coverage gaps, analyze temporal dynamics of local news production, and conduct large-scale computational journalism research.
+- **Complete Web Preservation**: Full WARC format preservation including HTML, CSS, JavaScript, and dynamic content—not just plaintext
+- **Comprehensive Local Coverage**: 14,000+ outlets across all 50 states vs. competing datasets with limited geographic coverage
+- **Ongoing Longitudinal Data**: Daily crawls supporting continuous longitudinal analysis vs. fixed-period datasets
+- **High-Fidelity Capture**: Browsertrix headless browser execution captures dynamic content and JavaScript-rendered elements missed by traditional crawlers
+- **Public Access**: Free and publicly available at Internet Archive vs. restricted commercial datasets
+- **Rich Geographic Metadata**: County-level and FIPS code information enabling fine-grained spatial analysis
+- **Browsable Archive**: Full pages accessible via Internet Archive's Wayback Machine alongside structured dataset
 
 To cite, kindly use:
 ```bibtex
@@ -17,6 +22,7 @@ To cite, kindly use:
 
 <img src="img/overview.png" alt="Alt Text"/>
 
+---
 
 ## 2. Dataset
 
@@ -25,26 +31,40 @@ To cite, kindly use:
 1. USLNDA: https://archive.org/details/us-local-news-data
 2. Processed USLNDA 6-month snapshot:
 
-### 2.2. Dataset Overview
+### 2.2. USLNDA workflow 
 
-**Scale & Coverage:**
-- 14,000+ local news sources (newspapers, TV, radio stations)
-- All 50 US states
-- 363+ million WARC records (6-month analysis)
-- 3.8+ million validated news articles
-- Daily ongoing crawls (up to 5 articles per source per day)
+The USLNDA pipeline consists of three main stages:
+- **Build Phase** (`build/` directory): Daily crawls using Browsertrix, WARC file generation, and upload to Internet Archive
+- **Process Phase** (`process/` directory): Download WARC files and extract/analyze news article data with geographic metadata
 
-**Data Format:**
-- WARC (Web ARChive) format for full web preservation
-- Includes HTML, CSS, JavaScript, images, and dynamically rendered content
-- Processed USLNDA 6-month snapshot with enriched with metadata: temporal and county-level geographic information including state, county, and FIPS codes
+#### 2.2.1. Daily Crawling (Build Phase)
+- Browsertrix-based headless browser crawler discovers and archives web content
+- Prioritizes RSS feeds for structured article links; crawls homepages for sites without RSS
+- Extracts up to 5 articles per website per day
+- Generates WARC files with naming convention: `USLNDA-ST-YYYYMMDD-HHMMSS_ABCD.warc.gz`
+  - ST: two-character state abbreviation (e.g., VA)
+  - YYYYMMDD-HHMMSS: UTC date/time of crawl
+  - ABCD: zero-padded sequence number (file rollover at 10GB limit)
 
-<img src="img/us-map.png" alt="Alt Text"/>
+#### 2.2.2. Upload and Preservation
+- Parallel WARC upload to Internet Archive collection ([us-local-news-data](https://archive.org/details/us-local-news-data))
+- MD5 checksum verification and deduplication
+- Retry mechanisms for failed uploads (3+ attempts)
+- Continuous validation of recent uploads (past 3 days)
+- Files accessible via Internet Archive's Wayback Machine and API
 
-## 4. USLNDA workflow 
+#### 2.2.3. Processing and Extraction (Process Phase)
+A multi-stage pipeline extracts structured article data from WARC files:
+1. **Record Filtering**: Process only WARC "response" records
+2. **Content-Type Filtering**: Retain HTML resources only, discard images/scripts/CSS
+3. **Domain Matching**: Verify URLs belong to covered local news websites
+4. **Article Identification**: Apply heuristics and StorySniffer to distinguish articles from directory pages
+5. **Content Extraction**: Extract titles and main text using HTML parsing techniques
+6. **Metadata Enrichment**: Augment with source media type, home county/state, and FIPS code
+7. **Output**: Parquet files partitioned by state, county, and date; summary CSVs with statistics
 
-1. **Build Phase** (`build/` directory): Daily crawls using Browsertrix, WARC file generation, and upload to Internet Archive
-2. **Process Phase** (`process/` directory): Download WARC files and extract/analyze news article data with geographic metadata
+
+---
 
 ### 4.1. Configuration, Requirements and Dependencies
 
@@ -79,6 +99,8 @@ Set up Internet Archive credentials:
 ia configure
 ```
 This will prompt for your Internet Archive username and password.
+
+---
 
 ### 4.2. Build Scripts
 
@@ -196,7 +218,9 @@ High-performance uploader for Internet Archive using process-based parallelism. 
 python build/uploader.py --max_workers 16 --stage_to_local --local_stage_path /ssd/staging --collection us-local-news-data
 ```
 </details>
-  
+
+---
+
 ### 4.3. Process Scripts
 
 #### 4.3.1. download_uslnda.py
@@ -274,62 +298,7 @@ python process/process_uslnda.py --year 2023 --month 01 --site_csv sites.csv --d
 ```
 </details>
 
-
-
-
-
-## Why USLNDA
-
-Unlike existing news datasets, USLNDA uniquely combines:
-
-- **Complete Web Preservation**: Full WARC format preservation including HTML, CSS, JavaScript, and dynamic content—not just plaintext
-- **Comprehensive Local Coverage**: 14,000+ outlets across all 50 states vs. competing datasets with limited geographic coverage
-- **Ongoing Longitudinal Data**: Daily crawls supporting continuous longitudinal analysis vs. fixed-period datasets
-- **High-Fidelity Capture**: Browsertrix headless browser execution captures dynamic content and JavaScript-rendered elements missed by traditional crawlers
-- **Public Access**: Free and publicly available at Internet Archive vs. restricted commercial datasets
-- **Rich Geographic Metadata**: County-level and FIPS code information enabling fine-grained spatial analysis
-- **Reduced Sampling Bias**: Daily systematic crawls vs. query-based collection methods that can overrepresent popular/widely-shared articles
-- **Browsable Archive**: Full pages accessible via Internet Archive's Wayback Machine alongside structured dataset
-
-## Data Pipeline
-
-The USLNDA pipeline consists of three main stages:
-
-### 1. Daily Crawling (Build Phase)
-- Browsertrix-based headless browser crawler discovers and archives web content
-- Prioritizes RSS feeds for structured article links; crawls homepages for sites without RSS
-- Extracts up to 5 articles per website per day
-- Generates WARC files with naming convention: `USLNDA-ST-YYYYMMDD-HHMMSS_ABCD.warc.gz`
-  - ST: two-character state abbreviation (e.g., VA)
-  - YYYYMMDD-HHMMSS: UTC date/time of crawl
-  - ABCD: zero-padded sequence number (file rollover at 10GB limit)
-
-### 2. Upload and Preservation
-- Parallel WARC upload to Internet Archive collection ([us-local-news-data](https://archive.org/details/us-local-news-data))
-- MD5 checksum verification and deduplication
-- Retry mechanisms for failed uploads (3+ attempts)
-- Continuous validation of recent uploads (past 3 days)
-- Files accessible via Internet Archive's Wayback Machine and API
-
-### 3. Processing and Extraction (Process Phase)
-A multi-stage pipeline extracts structured article data from WARC files:
-1. **Record Filtering**: Process only WARC "response" records
-2. **Content-Type Filtering**: Retain HTML resources only, discard images/scripts/CSS
-3. **Domain Matching**: Verify URLs belong to covered local news websites
-4. **Article Identification**: Apply heuristics and StorySniffer to distinguish articles from directory pages
-5. **Content Extraction**: Extract titles and main text using HTML parsing techniques
-6. **Metadata Enrichment**: Augment with source media type, home county/state, and FIPS code
-7. **Output**: Parquet files partitioned by state, county, and date; summary CSVs with statistics
-
-### Input
-- JSON files with publication/site information (for crawling)
-- CSV files with site metadata (for processing)
-- WARC files from Internet Archive
-
-### Output
-- WARC files (.warc.gz): Web archive files from crawling containing full web content and resources
-- Parquet files: Structured article data with metadata (partitioned by state, county, date)
-- CSV files: Summary statistics and extracted article information
+---
 
 ## Use Cases
 
