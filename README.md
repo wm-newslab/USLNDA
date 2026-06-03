@@ -13,7 +13,7 @@ USLNDA is **the first public large-scale ongoing longitudinal US local news repo
 
 To cite, kindly use:
 ```bibtex
-@inproceedings{gangani_alam_nwala_2026uslnda,
+@misc{gangani_alam_nwala_2026uslnda,
   title={USLNDA: US Local News Data Archive},
   author={Ariyarathne, Gangani and Alam, Sawood and Nwala, Alexander C.},
   year={2026}
@@ -29,7 +29,7 @@ To cite, kindly use:
 ### 2.1. Access Dataset
 
 1. USLNDA: https://archive.org/details/us-local-news-data
-2. Processed USLNDA 6-month snapshot:
+2. Processed USLNDA 6-month snapshot: [link](https://app.globus.org/file-manager?origin_id=3c5825aa-0bff-43b0-84c6-a9946e08a2c9&origin_path=%2F)
 
 ### 2.2. USLNDA workflow 
 
