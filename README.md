@@ -4,7 +4,7 @@
 
 USLNDA is **the first public large-scale ongoing longitudinal US local news repository**, which is a comprehensive archive of US local news content, publicly available at the [Internet Archive](https://archive.org/details/us-local-news-data). This project addresses the critical decline in local journalism by preserving high-fidelity web content from over **5,000 US local newspapers, TV, and radio stations across all 50 states**. 
 - **Complete Web Preservation**: Full WARC format preservation including HTML, CSS, JavaScript, and dynamic content, not just plaintext
-- **Comprehensive Local Coverage**: 14,000+ outlets across all 50 states
+- **Comprehensive Local Coverage**: 5,000+ outlets across all 50 states
 - **Ongoing Longitudinal Data**: Daily crawls supporting continuous longitudinal analysis vs. fixed-period datasets
 - **High-Fidelity Capture**: Browsertrix headless browser execution captures dynamic content and JavaScript-rendered elements missed by traditional crawlers
 - **Public Access**: Free and publicly available at Internet Archive.
