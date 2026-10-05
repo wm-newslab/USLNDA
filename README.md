@@ -42,13 +42,29 @@ $ zcat us-local-news-data.cdx.gz | wc -l
 384724749
 ```
 
-The same can be counted using tools like [DuckDB](https://duckdb.org/) by running an SQL query on the Parquet file:
+A more detailed breakdown of the holdings can be seen using tools like [CDX Summary](https://github.com/internetarchive/cdx-summary):
+
+```
+$ cdxsummary us-local-news-data.cdx.gz
+[...DELETIA...]
+```
+
+The number of captures can also be counted using tools like [DuckDB](https://duckdb.org/) by running an SQL query on the Parquet file:
 
 ```
 $ duckdb -markdown -c "SELECT COUNT(*) AS captures FROM 'us-local-news-data.parquet';"
 | captures  |
 |----------:|
 | 384724748 |
+```
+
+Or count unique `200 OK` HTML pages:
+
+```
+$ duckdb -markdown -c "SELECT COUNT(DISTINCT urlkey) AS unique_ok_html FROM 'us-local-news-data.parquet' WHERE mimetype = 'text/html' AND statuscode = 200;"
+| unique_ok_html |
+|---------------:|
+| 16817543       |
 ```
 
 Or describe the fields of the index file:
