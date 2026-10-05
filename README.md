@@ -28,8 +28,68 @@ To cite, kindly use:
 
 ### 2.1. Access Dataset
 
-1. USLNDA: https://archive.org/details/us-local-news-data
+1. USLNDA Internet Archive WARC Collection: https://archive.org/details/us-local-news-data
 2. Processed USLNDA 6-month snapshot: [link](https://app.globus.org/file-manager?origin_id=3c5825aa-0bff-43b0-84c6-a9946e08a2c9&origin_path=%2F)
+
+Consolidated crawl index data for the collection is made available in [CDX](https://archive.org/download/us-local-news-data/us-local-news-data.cdx.gz) and [Parquet](https://archive.org/download/us-local-news-data/us-local-news-data.parquet) formats (updated manually).
+These files can be downloaded for local processing and analytics on fields that are part of a typical 11-column [CDX file](https://archive.org/web/researcher/cdx_file_format.php).
+Both the files contain the same information, but formatted differently to support different tools and use-cases.
+
+For example, we can count the number of captures using standard Unix tools (the count will include the header line as well) using the compressed CDX file:
+
+```
+$ zcat us-local-news-data.cdx.gz | wc -l
+384724749
+```
+
+The same can be counted using tools like [DuckDB](https://duckdb.org/) by running an SQL query on the Parquet file:
+
+```
+$ duckdb -markdown -c "SELECT COUNT(*) AS captures FROM 'us-local-news-data.parquet';"
+| captures  |
+|----------:|
+| 384724748 |
+```
+
+Or describe the fields of the index file:
+
+```
+$ duckdb -markdown -c "DESCRIBE 'us-local-news-data.parquet';"
+| column_name | column_type |
+|-------------|-------------|
+| urlkey      | VARCHAR     |
+| timestamp   | TIMESTAMP   |
+| original    | VARCHAR     |
+| mimetype    | VARCHAR     |
+| statuscode  | INTEGER     |
+| digest      | VARCHAR     |
+| redirect    | VARCHAR     |
+| robotflags  | VARCHAR     |
+| length      | BIGINT      |
+| offset      | BIGINT      |
+| filename    | VARCHAR     |
+```
+
+Or list the top-10 status codes bu their capture counts:
+
+```
+$ duckdb -markdown -c "SELECT statuscode, COUNT(*) AS count FROM 'us-local-news-data.parquet' GROUP BY statuscode ORDER BY count DESC LIMIT 10;"
+| statuscode |   count   |
+|-----------:|----------:|
+| 200        | 363185722 |
+| 302        | 6919702   |
+| 301        | 6433190   |
+| 404        | 2312738   |
+| 307        | 1628635   |
+| 400        | 1165013   |
+| 204        | 640711    |
+| 201        | 552067    |
+| 206        | 542087    |
+| 429        | 522454    |
+```
+
+The Parquet file can also be loaded as a DataFrame (in R, Pandas, or other similar tools) for scrpting.
+
 
 ### 2.2. USLNDA workflow 
 
